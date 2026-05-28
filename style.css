@@ -140,6 +140,6 @@ input:checked + .slider:before {
     transition: 0.4s;
 }
 
-/* Invert icon colors dynamically depending on slider position */
-input:checked + .slider .sun { color: var(--bg-color); }
-input:not(:checked) + .slider .moon { color: var(--bg-color); }
+/* Highlight Moon when checked (right side), Sun when unchecked (left side) */
+input:checked + .slider .moon { color: var(--bg-color); }
+input:not(:checked) + .slider .sun { color: var(--bg-color); }
