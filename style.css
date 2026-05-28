@@ -1,19 +1,23 @@
-/* CSS Variables for Theme Toggling */
+/* --- Global Design Tokens --- */
 :root {
     --bg-color: #f4f4f5;
     --text-color: #18181b;
-    --accent-color: #3b82f6;
+    --accent-color: #2563eb;
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --card-border: rgba(24, 24, 27, 0.1);
 }
 
 [data-theme="dark"] {
     --bg-color: #09090b;
     --text-color: #fafafa;
     --accent-color: #60a5fa;
+    --card-bg: rgba(20, 20, 23, 0.6);
+    --card-border: rgba(250, 250, 250, 0.1);
 }
 
 body {
     margin: 0;
-    overflow: hidden; /* Locked until pop */
+    overflow: hidden;
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Courier New', Courier, monospace;
@@ -30,20 +34,20 @@ body {
     cursor: pointer;
 }
 
-/* Portfolio Content Structure */
+/* --- Core Layout Engine --- */
 #portfolio-content {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
     z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
     opacity: 0;
     pointer-events: none;
-    padding-top: 15vh;
+    padding: 10vh 2rem 5vh 2rem;
     box-sizing: border-box;
     transition: opacity 2s ease-in;
 }
@@ -51,33 +55,122 @@ body {
 #portfolio-content.active {
     opacity: 1;
     pointer-events: all;
+    overflow-y: auto; /* Allow layout to scroll if content spills over */
 }
 
-h1 { 
-    font-size: 3rem; 
-    margin-bottom: 0.5rem; 
-}
-
-h2 { 
-    font-size: 1.2rem; 
-    font-weight: normal; 
-    margin-bottom: 3rem; 
-    color: var(--accent-color); 
-}
-
-h3 { 
-    border-bottom: 1px solid var(--accent-color); 
-    padding-bottom: 0.5rem; 
-}
-
-section {
-    width: 80%;
-    max-width: 600px;
-    margin-bottom: 2rem;
+/* --- Hero Element Layout --- */
+.hero-section {
     text-align: center;
+    margin-bottom: 4rem;
 }
 
-/* --- New Animated Theme Switch --- */
+.hero-section h1 {
+    font-size: 3.5rem;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.hero-section h2 {
+    font-size: 1.2rem;
+    font-weight: normal;
+    color: var(--accent-color);
+    margin-top: 0.5rem;
+}
+
+/* --- Main Layout Grid --- */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Distinct two-column layout */
+    gap: 2rem;
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 4rem;
+}
+
+/* Responsive fallback for smaller laptops or mobile devices */
+@media (max-width: 768px) {
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Component Cards --- */
+.portfolio-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(8px); /* Soft glass layer over particle canvas */
+    border-radius: 8px;
+    padding: 2rem;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.portfolio-card:hover {
+    border-color: var(--accent-color);
+}
+
+.portfolio-card h3 {
+    margin-top: 0;
+    font-size: 1.3rem;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Skills Layout Components --- */
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.skill-badge {
+    border: 1px solid var(--text-color);
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.skill-badge:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* --- Projects Sub-Grid --- */
+.project-placeholder {
+    border: 1px dashed var(--card-border);
+    padding: 1.5rem;
+    border-radius: 6px;
+    text-align: left;
+}
+
+.project-placeholder h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--accent-color);
+}
+
+.project-placeholder p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* --- Footer Elements --- */
+#contact {
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+    padding-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--card-border);
+    border-top: 1px solid var(--card-border);
+    max-width: 1100px;
+}
+
+/* --- Animated Theme Switch Configuration --- */
 .theme-switch {
     position: absolute;
     top: 20px;
@@ -88,21 +181,16 @@ section {
     z-index: 100;
 }
 
-/* Hide the default HTML checkbox */
 .theme-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-/* The sliding track */
 .slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background-color: transparent;
     border: 1px solid var(--text-color);
     transition: 0.4s;
@@ -114,7 +202,6 @@ section {
     box-sizing: border-box;
 }
 
-/* The sliding circle */
 .slider:before {
     position: absolute;
     content: "";
@@ -123,23 +210,20 @@ section {
     left: 3px;
     bottom: 3px;
     background-color: var(--text-color);
-    transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Adds a slight bounce */
+    transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border-radius: 50%;
     z-index: 2;
 }
 
-/* Slide to the right when checked (Light Mode) */
 input:checked + .slider:before {
     transform: translateX(30px);
 }
 
-/* Icon Styling */
 .icon {
     z-index: 1;
     color: var(--text-color);
     transition: 0.4s;
 }
 
-/* Highlight Moon when checked (right side), Sun when unchecked (left side) */
 input:checked + .slider .moon { color: var(--bg-color); }
 input:not(:checked) + .slider .sun { color: var(--bg-color); }

@@ -22,22 +22,37 @@
     <div id="webgl-container"></div>
 
     <main id="portfolio-content">
-        <h1>Johnny</h1>
-        <h2>Student</h2>
+        <header class="hero-section">
+            <h1>Johnny</h1>
+            <h2>Student & Systems Engineer</h2>
+        </header>
         
-        <section id="skills">
-            <h3>Skills</h3>
-            <p>C++ | Python | C | JavaScript | PHP</p>
-        </section>
-
-        <section id="projects">
-            <h3>Projects</h3>
-            <p>[ Project details pending implementation ]</p>
-        </section>
-
-        <section id="contact">
-            <h3>Contact</h3>
+        <div class="portfolio-grid">
+            <section id="skills" class="portfolio-card">
+                <h3>Technical Skills</h3>
+                <div class="skills-container">
+                    <span class="skill-badge">C++</span>
+                    <span class="skill-badge">Python</span>
+                    <span class="skill-badge">C</span>
+                    <span class="skill-badge">JavaScript</span>
+                    <span class="skill-badge">PHP</span>
+                </div>
             </section>
+
+            <section id="projects" class="portfolio-card">
+                <h3>Featured Architecture</h3>
+                <div class="projects-container">
+                    <div class="project-placeholder">
+                        <h4>Core Engine Expansion</h4>
+                        <p>[ Project implementation timeline details pending execution ]</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer id="contact">
+            <p>// Connect: [ GitHub Repository Pending ] &bull; [ Secure Email Pending ]</p>
+        </footer>
     </main>
 
     <script src="script.js" defer></script>
