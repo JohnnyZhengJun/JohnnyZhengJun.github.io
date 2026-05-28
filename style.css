@@ -54,7 +54,7 @@ body {
 
 #portfolio-content.active {
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: auto; /* Changing it to auto from all resets it back to normal HTML behavior, making elements clickable. */
     overflow-y: auto; /* Allow layout to scroll if content spills over */
 }
 
