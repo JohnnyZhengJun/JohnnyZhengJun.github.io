@@ -86,6 +86,13 @@ body {
     max-width: 1100px;
     margin-bottom: 4rem;
 }
+/* --- Column Wrappers --- */
+.grid-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; /* Matches the grid gap for perfect alignment */
+}
+
 
 /* Responsive fallback for smaller laptops or mobile devices */
 @media (max-width: 768px) {
@@ -98,7 +105,7 @@ body {
 .portfolio-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(8px); /* Soft glass layer over particle canvas */
+    backdrop-filter: blur(8px);
     border-radius: 8px;
     padding: 2rem;
     box-sizing: border-box;
