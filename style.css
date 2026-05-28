@@ -227,24 +227,3 @@ input:checked + .slider:before {
 
 input:checked + .slider .moon { color: var(--bg-color); }
 input:not(:checked) + .slider .sun { color: var(--bg-color); }
-
-/* --- Clickable Project Links --- */
-.project-link {
-    display: block; /* Makes the entire box clickable */
-    text-decoration: none; /* Removes default link underline */
-    color: inherit; /* Keeps text color matching the theme */
-    margin-bottom: 1rem; /* Adds space between multiple projects */
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-}
-
-/* Remove margin from the very last project so it aligns perfectly */
-.project-link:last-child {
-    margin-bottom: 0;
-}
-
-/* Hover physics for clickable projects */
-.project-link:hover {
-    border-color: var(--accent-color);
-    background-color: rgba(96, 165, 250, 0.05); /* Very subtle tint on hover */
-    cursor: pointer;
-}
