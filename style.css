@@ -234,3 +234,22 @@ input:checked + .slider:before {
 
 input:checked + .slider .moon { color: var(--bg-color); }
 input:not(:checked) + .slider .sun { color: var(--bg-color); }
+
+/* --- Clickable Project Links Fix --- */
+.project-link {
+    display: block; /* Forces the link to behave like a proper box */
+    text-decoration: none; /* Removes the default blue underline */
+    color: inherit; /* Forces the text to match your Light/Dark theme */
+    margin-bottom: 1rem; 
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.project-link:last-child {
+    margin-bottom: 0;
+}
+
+.project-link:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(96, 165, 250, 0.05); /* Slight blue tint on hover */
+    cursor: pointer;
+}
