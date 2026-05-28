@@ -1,0 +1,97 @@
+/* CSS Variables for Theme Toggling */
+:root {
+    --bg-color: #f4f4f5;
+    --text-color: #18181b;
+    --accent-color: #3b82f6;
+}
+
+[data-theme="dark"] {
+    --bg-color: #09090b;
+    --text-color: #fafafa;
+    --accent-color: #60a5fa;
+}
+
+body {
+    margin: 0;
+    overflow: hidden; /* Locked until pop */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#webgl-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    cursor: pointer;
+}
+
+/* Portfolio Content Structure */
+#portfolio-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    padding-top: 15vh;
+    box-sizing: border-box;
+    transition: opacity 2s ease-in;
+}
+
+#portfolio-content.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+h1 { 
+    font-size: 3rem; 
+    margin-bottom: 0.5rem; 
+}
+
+h2 { 
+    font-size: 1.2rem; 
+    font-weight: normal; 
+    margin-bottom: 3rem; 
+    color: var(--accent-color); 
+}
+
+h3 { 
+    border-bottom: 1px solid var(--accent-color); 
+    padding-bottom: 0.5rem; 
+}
+
+section {
+    width: 80%;
+    max-width: 600px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 8px 16px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
