@@ -1,4 +1,6 @@
-/* --- Global Design Tokens --- */
+/* ==========================================================================
+   1. GLOBAL VARIABLES & BROWSER RESETS
+   ========================================================================== */
 :root {
     --bg-color: #f4f4f5;
     --text-color: #18181b;
@@ -24,6 +26,18 @@ body {
     transition: background-color 0.5s ease, color 0.5s ease;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+    background: var(--card-border); 
+    border-radius: 4px; 
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+/* ==========================================================================
+   2. CORE ARCHITECTURE & LAYOUT
+   ========================================================================== */
 #webgl-container {
     position: fixed;
     top: 0;
@@ -34,7 +48,6 @@ body {
     cursor: pointer;
 }
 
-/* --- Core Layout Engine --- */
 #portfolio-content {
     position: absolute;
     top: 0;
@@ -54,11 +67,13 @@ body {
 
 #portfolio-content.active {
     opacity: 1;
-    pointer-events: auto; /* Changing it to auto from all resets it back to normal HTML behavior, making elements clickable. */
-    overflow-y: auto; /* Allow layout to scroll if content spills over */
+    pointer-events: auto; 
+    overflow-y: auto; 
 }
 
-/* --- Hero Element Layout --- */
+/* ==========================================================================
+   3. HERO SECTION (HEADER)
+   ========================================================================== */
 .hero-section {
     text-align: center;
     margin-bottom: 4rem;
@@ -77,31 +92,30 @@ body {
     margin-top: 0.5rem;
 }
 
-/* --- Main Layout Grid --- */
+/* ==========================================================================
+   4. GRID SYSTEM & CARDS
+   ========================================================================== */
 .portfolio-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Distinct two-column layout */
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
     width: 100%;
     max-width: 1100px;
     margin-bottom: 4rem;
 }
-/* --- Column Wrappers --- */
+
 .grid-column {
     display: flex;
     flex-direction: column;
-    gap: 2rem; /* Matches the grid gap for perfect alignment */
+    gap: 2rem; 
 }
 
-
-/* Responsive fallback for smaller laptops or mobile devices */
 @media (max-width: 768px) {
     .portfolio-grid {
         grid-template-columns: 1fr;
     }
 }
 
-/* --- Component Cards --- */
 .portfolio-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -124,7 +138,10 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* --- Skills Layout Components --- */
+/* ==========================================================================
+   5. SPECIFIC CARD CONTENTS (SKILLS & PROJECTS)
+   ========================================================================== */
+/* Skills */
 .skills-container {
     display: flex;
     flex-wrap: wrap;
@@ -146,7 +163,7 @@ body {
     color: var(--bg-color);
 }
 
-/* --- Projects Sub-Grid --- */
+/* Projects */
 .project-placeholder {
     border: 1px dashed var(--card-border);
     padding: 1.5rem;
@@ -165,19 +182,90 @@ body {
     line-height: 1.4;
 }
 
-/* --- Footer Elements --- */
+.project-link {
+    display: block; 
+    text-decoration: none; 
+    color: inherit; 
+    margin-bottom: 1rem; 
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    position: relative;
+    z-index: 100;
+}
+
+.project-link:last-child {
+    margin-bottom: 0;
+}
+
+.project-link:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(96, 165, 250, 0.05); 
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   6. FOOTER 
+   ========================================================================== */
 #contact {
     width: 100%;
-    text-align: center;
-    margin-top: auto;
-    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; 
+    margin-top: 4rem; 
+    padding: 2rem 0;
     font-size: 0.85rem;
     color: var(--card-border);
     border-top: 1px solid var(--card-border);
     max-width: 1100px;
 }
 
-/* --- Animated Theme Switch Configuration --- */
+.footer-left { display: flex; flex-direction: column; gap: 0.5rem; text-align: left; flex: 1;}
+.footer-center { flex: 1; text-align: center; }
+.footer-right { flex: 1; } 
+
+.footer-link {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover { color: var(--accent-color); }
+
+.github-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor; 
+}
+
+/* ==========================================================================
+   7. INTERACTIVE WIDGETS (BUTTONS & TOGGLES)
+   ========================================================================== */
+/* Scroll to Top Button */
+#scrollToTopBtn {
+    display: none; 
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    outline: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+#scrollToTopBtn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* Theme Switcher */
 .theme-switch {
     position: absolute;
     top: 20px;
@@ -234,25 +322,3 @@ input:checked + .slider:before {
 
 input:checked + .slider .moon { color: var(--bg-color); }
 input:not(:checked) + .slider .sun { color: var(--bg-color); }
-
-/* --- Clickable Project Links Fix --- */
-.project-link {
-    display: block; /* Forces the link to behave like a proper box */
-    text-decoration: none; /* Removes the default blue underline */
-    color: inherit; /* Forces the text to match your Light/Dark theme */
-    margin-bottom: 1rem; 
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-
-    position: relative;
-    z-index: 100;
-}
-
-.project-link:last-child {
-    margin-bottom: 0;
-}
-
-.project-link:hover {
-    border-color: var(--accent-color);
-    background-color: rgba(96, 165, 250, 0.05); /* Slight blue tint on hover */
-    cursor: pointer;
-}

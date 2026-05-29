@@ -1,16 +1,20 @@
-// --- Theme Logic ---
+/* ==========================================================================
+1. THEME LOGIC
+   ========================================================================== */
 function toggleTheme() {
     const htmlTag = document.documentElement;
     const isDark = htmlTag.getAttribute('data-theme') === 'dark';
     htmlTag.setAttribute('data-theme', isDark ? 'light' : 'dark');
     
-    // Update particle colors based on theme
+    // Update Three.js particle colors based on theme
     if (particleMaterial) {
         particleMaterial.color.setHex(isDark ? 0x3b82f6 : 0x60a5fa);
     }
 }
 
-// --- Three.js Physics Engine ---
+/* ==========================================================================
+2. THREE.JS PHYSICS ENGINE
+   ========================================================================== */
 let scene, camera, renderer, particles, particleMaterial;
 let isPopped = false;
 let particleVelocities = [];
@@ -61,7 +65,7 @@ function init3D() {
     particles = new THREE.Points(geometry, particleMaterial);
     scene.add(particles);
 
-    // Event Listeners
+    // Event Listeners for 3D interaction
     window.addEventListener('resize', onWindowResize);
     container.addEventListener('click', explodeBubble);
     
@@ -116,3 +120,27 @@ function onWindowResize() {
 
 // Boot up the engine when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', init3D);
+
+/* ==========================================================================
+3. SCROLL-TO-TOP CONTROLLER
+   ========================================================================== */
+const contentContainer = document.getElementById('portfolio-content');
+const scrollBtn = document.getElementById('scrollToTopBtn');
+
+// Listen for scrolling inside the active content div
+contentContainer.addEventListener('scroll', () => {
+    // Show button if scrolled down past 200 pixels
+    if (contentContainer.scrollTop > 200) {
+        scrollBtn.style.display = "block";
+    } else {
+        scrollBtn.style.display = "none";
+    }
+});
+
+// Smooth scroll back to the top
+function scrollToTop() {
+    contentContainer.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
