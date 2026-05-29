@@ -6,7 +6,10 @@
     <title>Academic Timeline | Johnny</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="overflow-y: auto;"> <label class="theme-switch" for="theme-checkbox">
+<body style="overflow-y: auto;">
+
+    <!-- Theme Toggle Switch -->
+    <label class="theme-switch" for="theme-checkbox">
         <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()" checked>
         <div class="slider">
             <svg class="icon sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -16,25 +19,30 @@
 
     <main id="portfolio-content" class="active" style="pointer-events: auto;">
         
-        <header class="hero-section" style="margin-bottom: 2rem;">
+        <header class="hero-section" style="margin-bottom: 3rem;">
             <h1>Education</h1>
             <h2>Academic Journey & Trajectory</h2>
             <a href="index.html" class="back-link">&larr; Return to Portfolio</a>
         </header>
         
+        <!-- Glowing Circuit Timeline -->
         <div class="timeline-container">
             
+            <!-- Current / Future Milestone -->
             <div class="timeline-node">
-                <div class="timeline-date">2025 – 2026</div>
+                <div class="timeline-marker"></div>
                 <div class="portfolio-card timeline-card">
+                    <span class="timeline-date">[ 2025 &mdash; 2026 ]</span>
                     <h3>Senior Year: Systems Engineering Focus</h3>
                     <p>Completing advanced coursework in systems architecture, low-level programming (C++ / C), and algorithmic optimization.</p>
                 </div>
             </div>
 
+            <!-- Start Milestone -->
             <div class="timeline-node">
-                <div class="timeline-date">September 2021</div>
+                <div class="timeline-marker"></div>
                 <div class="portfolio-card timeline-card">
+                    <span class="timeline-date">[ Sep 2021 ]</span>
                     <h3>Yuan Ze University (YZU)</h3>
                     <p>Enrolled as a Freshman in the International Bachelor Program in Informatics (IBPI). Established a foundation in core computer science principles, data structures, and software architecture.</p>
                 </div>
