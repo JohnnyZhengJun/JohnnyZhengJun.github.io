@@ -17,6 +17,7 @@ let isUnlocked = false;
 
 function init3D() {
     const container = document.getElementById('webgl-container');
+    if (!container) return;
     
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -65,17 +66,29 @@ function unlockPortfolio() {
     sessionStorage.setItem('portfolioUnlocked', 'true');
 
     // Reveal HTML over the globe
-    document.getElementById('portfolio-content').classList.add('active');
+    const portfolioContent = document.getElementById('portfolio-content');
+    if (portfolioContent) {
+        portfolioContent.classList.add('active');
+    }
     document.body.style.overflow = 'auto';
     
-    // Push globe to background opacity but keep it alive
-    particleMaterial.opacity = 0.3;
-    document.getElementById('webgl-container').style.pointerEvents = 'none'; 
+    // Smoothly push globe to background opacity
+    if (particleMaterial) {
+        particleMaterial.opacity = 0.2;
+    }
+    
+    // Allow clicking elements through the canvas
+    const webglContainer = document.getElementById('webgl-container');
+    if (webglContainer) {
+        webglContainer.style.pointerEvents = 'none'; 
+    }
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    const time = Date.now() * 0.001; // Get continuous time for sine wave math
+    const time = Date.now() * 0.001; 
+
+    if (!particles || !particleMaterial) return;
 
     // JARVIS VISUAL STATE MACHINE
     if (window.jarvisState === 'IDLE') {
@@ -85,34 +98,36 @@ function animate() {
         particleMaterial.color.setHex(0x3b82f6); // Base Blue
     } 
     else if (window.jarvisState === 'LISTENING') {
-        particles.rotation.y += 0.005; // Spin slightly faster
-        const pulse = 1 + Math.sin(time * 8) * 0.03; // Gentle vibration
+        particles.rotation.y += 0.005; 
+        const pulse = 1 + Math.sin(time * 8) * 0.04; 
         particles.scale.set(pulse, pulse, pulse);
         particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
-        particleMaterial.opacity = 0.8; // Brighten up
+        particleMaterial.opacity = 0.85; 
     } 
     else if (window.jarvisState === 'THINKING') {
-        particles.rotation.x += 0.05; // Spin rapidly
-        particles.rotation.y += 0.05;
-        particles.scale.set(0.85, 0.85, 0.85); // Contract core
+        particles.rotation.x += 0.06; 
+        particles.rotation.y += 0.06;
+        particles.scale.set(0.8, 0.8, 0.8); 
         particleMaterial.color.setHex(0x9d4edd); // Processing Purple
     } 
     else if (window.jarvisState === 'SPEAKING') {
-        particles.rotation.y += 0.005;
-        const talkPulse = 1 + Math.sin(time * 15) * 0.08; // High frequency audio waves
+        particles.rotation.y += 0.004;
+        const talkPulse = 1 + Math.sin(time * 16) * 0.07; 
         particles.scale.set(talkPulse, talkPulse, talkPulse);
         particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
+        particleMaterial.opacity = 0.85;
     }
 
-    // Return to faint background if idle and portfolio is open
+    // Retain faint visual presence if system is unlocked and idle
     if (isUnlocked && window.jarvisState === 'IDLE') {
-        particleMaterial.opacity = 0.3;
+        particleMaterial.opacity = 0.2;
     }
 
     renderer.render(scene, camera);
 }
 
 function onWindowResize() {
+    if (!camera || !renderer) return;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -128,17 +143,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-3. AI PIPELINE & NLP (Web Speech API -> Gemini)
+3. AI PIPELINE & VOCAL ROUTING COMMANDS
    ========================================================================== */
 const micBtn = document.getElementById('ai-mic-btn'); 
 
 async function handleUserQuery(query) {
-    if (!query.trim()) {
+    const cleanQuery = query.toLowerCase().trim();
+    if (!cleanQuery) {
         window.jarvisState = 'IDLE';
         return;
     }
     
-    window.jarvisState = 'THINKING'; // Triggers Three.js rapid spin
+    // Local NLP Command Parser for Direct Navigation Route
+    if (cleanQuery.includes('open portfolio') || 
+        cleanQuery.includes('access system') || 
+        cleanQuery.includes('enter') || 
+        cleanQuery.includes('show portfolio')) {
+        
+        window.jarvisState = 'THINKING';
+        setTimeout(() => {
+            speakText("Access granted. Initializing portfolio display protocol.", () => {
+                unlockPortfolio();
+            });
+        }, 400);
+        return;
+    }
+    
+    window.jarvisState = 'THINKING'; 
     
     try {
         const response = await fetch('/api/chat', {
@@ -152,14 +183,14 @@ async function handleUserQuery(query) {
         if (response.ok && data.reply) {
             speakText(data.reply);
         } else {
-            speakText("System anomaly detected.");
+            speakText("System anomaly detected during handshake.");
         }
     } catch (error) {
-        speakText("Connection to host severed.");
+        speakText("Network configuration conflict. Connection severed.");
     }
 }
 
-function speakText(text) {
+function speakText(text, callback = null) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     
@@ -170,15 +201,20 @@ function speakText(text) {
     utterance.rate = 1.05; 
     utterance.pitch = 0.95; 
 
-    // Hook state to Three.js
     utterance.onstart = () => window.jarvisState = 'SPEAKING';
-    utterance.onend = () => window.jarvisState = 'IDLE';
-    utterance.onerror = () => window.jarvisState = 'IDLE';
+    utterance.onend = () => {
+        window.jarvisState = 'IDLE';
+        if (callback) callback();
+    };
+    utterance.onerror = () => {
+        window.jarvisState = 'IDLE';
+        if (callback) callback();
+    };
 
     window.speechSynthesis.speak(utterance);
 }
 
-// Hook Microphone
+// Speech Recognition Lifecycle Handling
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
@@ -193,5 +229,10 @@ if (SpeechRecognition) {
     };
     recognition.onresult = (event) => handleUserQuery(event.results[0][0].transcript);
 
-    if (micBtn) micBtn.addEventListener('click', () => recognition.start());
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            window.speechSynthesis.cancel(); // Mute ongoing talking immediately on new tap
+            recognition.start();
+        });
+    }
 }
