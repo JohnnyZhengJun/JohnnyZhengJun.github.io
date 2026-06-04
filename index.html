@@ -79,7 +79,7 @@
             </div>
 
         </div>
-
+        
         <footer id="contact">
             <div class="footer-left">
                 <p style="margin: 0 0 0.5rem 0; font-weight: bold; color: var(--text-color);">Contact Info:</p>
@@ -96,6 +96,19 @@
             </div>
             <div class="footer-right"></div>
         </footer>
+        
+        <!-- NEW: AI Assistant Widget -->
+        <div id="ai-widget" class="portfolio-card ai-panel">
+            <div id="ai-chat-log" class="ai-log">
+                <p class="ai-msg"><strong>System:</strong> Assistant initialized. How can I help?</p>
+            </div>
+            <div class="ai-input-group">
+                <button id="ai-mic-btn" class="ai-btn" title="Hold to Speak">🎤</button>
+                <input type="text" id="ai-text-input" placeholder="Ask about my timeline or skills..." autocomplete="off">
+                <button id="ai-send-btn" class="ai-btn">⮑</button>
+            </div>
+        </div>
+
     </main>
 
     <button id="scrollToTopBtn" onclick="scrollToTop()">&#8679; Top</button>

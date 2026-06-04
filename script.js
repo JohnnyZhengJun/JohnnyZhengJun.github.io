@@ -172,3 +172,90 @@ function scrollToTop() {
         behavior: 'smooth'
     });
 }
+
+/* ==========================================================================
+   AI ASSISTANT ENGINE (Web Speech API)
+   ========================================================================== */
+const aiWidget = document.getElementById('ai-widget');
+const chatLog = document.getElementById('ai-chat-log');
+const textInput = document.getElementById('ai-text-input');
+const micBtn = document.getElementById('ai-mic-btn');
+const sendBtn = document.getElementById('ai-send-btn');
+
+// Initialize Web Speech APIs
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const synthesis = window.speechSynthesis;
+let recognition = null;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => micBtn.classList.add('recording');
+    recognition.onend = () => micBtn.classList.remove('recording');
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        handleUserQuery(transcript);
+    };
+} else {
+    micBtn.style.display = 'none'; // Hide mic if browser doesn't support it
+}
+
+// Event Listeners
+micBtn.addEventListener('click', () => recognition && recognition.start());
+sendBtn.addEventListener('click', () => {
+    if (textInput.value.trim() !== '') {
+        handleUserQuery(textInput.value);
+        textInput.value = '';
+    }
+});
+textInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendBtn.click();
+});
+
+// Core Logic Functions
+function appendMessage(sender, text, isUser) {
+    const msgDiv = document.createElement('p');
+    msgDiv.className = isUser ? 'user-msg' : 'ai-msg';
+    msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    chatLog.appendChild(msgDiv);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function speakText(text) {
+    if (synthesis.speaking) synthesis.cancel(); // Interrupt previous speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    // Optional: tweak pitch and rate for a more "AI" sound
+    utterance.pitch = 1.1;
+    utterance.rate = 1.0; 
+    synthesis.speak(utterance);
+}
+
+async function handleUserQuery(query) {
+    appendMessage('You', query, true);
+    
+    // Phase 1: Mock Response. 
+    // Phase 2: This will be replaced with a fetch() call to your secure backend.
+    const aiResponse = await mockAIResponse(query);
+    
+    appendMessage('System', aiResponse, false);
+    speakText(aiResponse);
+}
+
+// Temporary Mock Engine
+function mockAIResponse(query) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const lowerQuery = query.toLowerCase();
+            if (lowerQuery.includes('skills') || lowerQuery.includes('c++')) {
+                resolve("Johnny specializes in low-level systems programming, primarily using strictly-typed C++ and C.");
+            } else if (lowerQuery.includes('timeline') || lowerQuery.includes('education')) {
+                resolve("Johnny is currently in his Senior year of Computer Science Engineering at YZU.");
+            } else {
+                resolve("I am processing your request. My secure LLM connection is currently pending deployment.");
+            }
+        }, 800); // Simulate network latency
+    });
+}
