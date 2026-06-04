@@ -119,8 +119,26 @@ function onWindowResize() {
 }
 
 // Boot up the engine when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', init3D);
-
+// Boot up the engine when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    init3D();
+    
+    // State Router: Bypass the 3D splash screen if returning from an internal page
+    if (window.location.hash === '#portfolio') {
+        isPopped = true; // Set state to popped
+        
+        // Trigger HTML Reveal instantly
+        document.getElementById('portfolio-content').classList.add('active');
+        document.body.style.overflow = 'auto'; 
+        document.getElementById('webgl-container').style.cursor = 'default';
+        document.getElementById('webgl-container').style.pointerEvents = 'none';
+        
+        // Instantly hide the 3D particles 
+        if (particleMaterial) {
+            particleMaterial.opacity = 0;
+        }
+    }
+});
 /* ==========================================================================
 3. SCROLL-TO-TOP CONTROLLER
    ========================================================================== */
