@@ -76,10 +76,16 @@ function explodeBubble() {
     if (isPopped) return;
     isPopped = true;
 
+    // Save to browser memory that the bubble has been popped
+    sessionStorage.setItem('portfolioUnlocked', 'true');
+
     // Trigger HTML Reveal
     document.getElementById('portfolio-content').classList.add('active');
     document.body.style.overflow = 'auto'; // Allow scrolling
     document.getElementById('webgl-container').style.cursor = 'default';
+    
+    // Crucial: Stop the invisible canvas from blocking clicks
+    document.getElementById('webgl-container').style.pointerEvents = 'none'; 
 }
 
 function animate() {
@@ -119,23 +125,27 @@ function onWindowResize() {
 }
 
 // Boot up the engine when the DOM is fully loaded
-// Boot up the engine when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    init3D();
+    const container = document.getElementById('webgl-container');
     
-    // State Router: Bypass the 3D splash screen if returning from an internal page
-    if (window.location.hash === '#portfolio') {
-        isPopped = true; // Set state to popped
+    // Only initialize 3D if we are on index.html
+    if (container) {
+        init3D();
         
-        // Trigger HTML Reveal instantly
-        document.getElementById('portfolio-content').classList.add('active');
-        document.body.style.overflow = 'auto'; 
-        document.getElementById('webgl-container').style.cursor = 'default';
-        document.getElementById('webgl-container').style.pointerEvents = 'none';
-        
-        // Instantly hide the 3D particles 
-        if (particleMaterial) {
-            particleMaterial.opacity = 0;
+        // Check browser memory. If already unlocked, skip the bubble animation instantly.
+        if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
+            isPopped = true;
+            
+            // Instantly reveal content
+            document.getElementById('portfolio-content').classList.add('active');
+            document.body.style.overflow = 'auto';
+            container.style.cursor = 'default';
+            container.style.pointerEvents = 'none';
+            
+            // Turn off the particles immediately
+            if (particleMaterial) {
+                particleMaterial.opacity = 0;
+            }
         }
     }
 });
