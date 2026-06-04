@@ -141,7 +141,6 @@ body {
 /* ==========================================================================
 5. SPECIFIC CARD CONTENTS (SKILLS & PROJECTS)
 ========================================================================== */
-/* Skills */
 .skills-container {
     display: flex;
     flex-wrap: wrap;
@@ -163,7 +162,6 @@ body {
     color: var(--bg-color);
 }
 
-/* Projects */
 .project-placeholder {
     border: 1px dashed var(--card-border);
     padding: 1.5rem;
@@ -242,7 +240,6 @@ body {
 /* ==========================================================================
 7. INTERACTIVE WIDGETS (BUTTONS & TOGGLES)
 ========================================================================== */
-/* Scroll to Top Button */
 #scrollToTopBtn {
     display: none; 
     position: fixed;
@@ -265,7 +262,6 @@ body {
     color: var(--bg-color);
 }
 
-/* Theme Switcher */
 .theme-switch {
     position: absolute;
     top: 20px;
@@ -322,162 +318,34 @@ input:checked + .slider:before {
 
 input:checked + .slider .moon { color: var(--bg-color); }
 input:not(:checked) + .slider .sun { color: var(--bg-color); }
+
 /* ==========================================================================
-8. TIMELINE LAYOUT (timeline.html)
+8. AI ASSISTANT WIDGET (JARVIS)
 ========================================================================== */
-.back-link {
-    display: inline-block;
-    margin-top: 1rem;
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    border-bottom: 1px dashed var(--card-border);
-    padding-bottom: 2px;
-    transition: all 0.3s ease;
-}
-
-.back-link:hover {
-    color: var(--accent-color);
-    border-color: var(--accent-color);
-}
-
-/* The Circuit Track */
-.timeline-container {
-    max-width: 800px;
-    width: 100%;
-    margin: 0 auto 4rem auto;
-    padding-left: 3rem; /* Room for the vertical line */
-    position: relative;
-    box-sizing: border-box;
-}
-
-/* The Gradient Vertical Line */
-.timeline-container::before {
-    content: '';
-    position: absolute;
-    top: 1rem;
-    bottom: -2rem; /* Lets the line fade out at the bottom */
-    left: 11px; /* Perfectly centers the line under the glowing nodes */
-    width: 2px;
-    background: linear-gradient(to bottom, var(--accent-color), transparent);
-    opacity: 0.4;
-}
-
-.timeline-node {
-    position: relative;
-    margin-bottom: 3rem;
-}
-
-/* The Glowing Nodes */
-.timeline-marker {
-    position: absolute;
-    left: -3rem; /* Pulls the node back onto the line */
-    top: 1.5rem;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--bg-color);
-    border: 3px solid var(--accent-color);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Soft resting glow */
-    z-index: 2;
-    transition: all 0.3s ease;
-}
-
-/* Connecting the Hover Physics to the Marker */
-.timeline-card:hover {
-    transform: translateX(5px); /* Card slides slightly right */
-    border-color: var(--accent-color);
-}
-
-/* When the card is hovered, light up the node next to it */
-.timeline-node:hover .timeline-marker {
-    background: var(--accent-color);
-    box-shadow: 0 0 20px var(--accent-color);
-    transform: scale(1.2); /* Node pops slightly */
-}
-
-/* The Tech Badge Date */
-.timeline-date {
-    display: inline-block;
-    font-size: 0.85rem;
-    color: var(--accent-color);
-    margin-bottom: 1rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    border-bottom: 1px dashed var(--card-border);
-    padding-bottom: 4px;
-}
-
-.timeline-card {
-    margin-bottom: 0;
-    padding: 2rem;
-    transition: all 0.3s ease;
-}
-
-/* ==========================================================================
-   9. AI ASSISTANT WIDGET
-   ========================================================================== */
-.ai-panel {
+#ai-widget {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 350px;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    z-index: 100;
-    backdrop-filter: blur(10px);
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
 }
 
-.ai-log {
-    max-height: 150px;
-    overflow-y: auto;
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
-    font-family: monospace;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.ai-msg { margin: 0; color: var(--accent-color); }
-.user-msg { margin: 0; color: var(--text-color); text-align: right; }
-
-.ai-input-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-#ai-text-input {
-    flex-grow: 1;
-    background: transparent;
-    border: 1px dashed var(--card-border);
-    color: var(--text-color);
-    padding: 0.5rem;
-    font-family: inherit;
-    outline: none;
-}
-
-#ai-text-input:focus {
-    border-color: var(--accent-color);
-}
-
-.ai-btn {
-    background: transparent;
-    border: 1px solid var(--card-border);
-    color: var(--text-color);
+#ai-mic-btn {
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid #00f2fe;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
     cursor: pointer;
-    padding: 0.5rem;
+    color: #00f2fe;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
     transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.ai-btn:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
-.ai-btn.recording {
-    background: rgba(255, 0, 0, 0.2);
-    border-color: red;
-    color: red;
+#ai-mic-btn:hover {
+    background: rgba(0, 242, 254, 0.3);
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.6);
+    transform: scale(1.05);
 }
