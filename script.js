@@ -1,23 +1,19 @@
 /* ==========================================================================
-1. THEME LOGIC
+1. GLOBAL JARVIS STATE & THEME
    ========================================================================== */
+window.jarvisState = 'IDLE'; // IDLE, LISTENING, THINKING, SPEAKING
+
 function toggleTheme() {
     const htmlTag = document.documentElement;
     const isDark = htmlTag.getAttribute('data-theme') === 'dark';
     htmlTag.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    
-    // Update Three.js particle colors based on theme
-    if (particleMaterial) {
-        particleMaterial.color.setHex(isDark ? 0x3b82f6 : 0x60a5fa);
-    }
 }
 
 /* ==========================================================================
-2. THREE.JS PHYSICS ENGINE
+2. THREE.JS PHYSICS ENGINE (The Avatar)
    ========================================================================== */
 let scene, camera, renderer, particles, particleMaterial;
-let isPopped = false;
-let particleVelocities = [];
+let isUnlocked = false;
 
 function init3D() {
     const container = document.getElementById('webgl-container');
@@ -30,33 +26,25 @@ function init3D() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Create the Bubble (Sphere of Particles)
+    // Create the JARVIS Sphere
     const particleCount = 5000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
-        // Spherical math for bubble shape
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos((Math.random() * 2) - 1);
         const radius = 15;
 
-        positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);     // x
-        positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta); // y
-        positions[i * 3 + 2] = radius * Math.cos(phi);                   // z
-
-        // Store random velocities for the explosion
-        particleVelocities.push({
-            x: (Math.random() - 0.5) * 2,
-            y: (Math.random() - 0.5) * 2,
-            z: (Math.random() - 0.5) * 2
-        });
+        positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);     
+        positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta); 
+        positions[i * 3 + 2] = radius * Math.cos(phi);                   
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     
     particleMaterial = new THREE.PointsMaterial({
-        color: 0x60a5fa,
+        color: 0x3b82f6, // Default Blue
         size: 0.3,
         transparent: true,
         opacity: 0.8
@@ -65,54 +53,60 @@ function init3D() {
     particles = new THREE.Points(geometry, particleMaterial);
     scene.add(particles);
 
-    // Event Listeners for 3D interaction
     window.addEventListener('resize', onWindowResize);
-    container.addEventListener('click', explodeBubble);
+    container.addEventListener('click', unlockPortfolio);
     
     animate();
 }
 
-function explodeBubble() {
-    if (isPopped) return;
-    isPopped = true;
-
-    // Save to browser memory that the bubble has been popped
+function unlockPortfolio() {
+    if (isUnlocked) return;
+    isUnlocked = true;
     sessionStorage.setItem('portfolioUnlocked', 'true');
 
-    // Trigger HTML Reveal
+    // Reveal HTML over the globe
     document.getElementById('portfolio-content').classList.add('active');
-    document.body.style.overflow = 'auto'; // Allow scrolling
-    document.getElementById('webgl-container').style.cursor = 'default';
+    document.body.style.overflow = 'auto';
     
-    // Crucial: Stop the invisible canvas from blocking clicks
+    // Push globe to background opacity but keep it alive
+    particleMaterial.opacity = 0.3;
     document.getElementById('webgl-container').style.pointerEvents = 'none'; 
 }
 
 function animate() {
     requestAnimationFrame(animate);
+    const time = Date.now() * 0.001; // Get continuous time for sine wave math
 
-    if (!isPopped) {
-        // Ambient rotation for the bubble
+    // JARVIS VISUAL STATE MACHINE
+    if (window.jarvisState === 'IDLE') {
         particles.rotation.x += 0.002;
         particles.rotation.y += 0.002;
-    } else {
-        // The Pop Physics (Scattering droplets)
-        const positions = particles.geometry.attributes.position.array;
-        for (let i = 0; i < positions.length / 3; i++) {
-            // Apply velocity
-            positions[i * 3] += particleVelocities[i].x;
-            positions[i * 3 + 1] += particleVelocities[i].y;
-            positions[i * 3 + 2] += particleVelocities[i].z;
-            
-            // Add slight drag/gravity effect to particles over time
-            particleVelocities[i].y -= 0.01; 
-        }
-        particles.geometry.attributes.position.needsUpdate = true;
-        
-        // Fade out particles slowly as they form the background
-        if (particleMaterial.opacity > 0.1) {
-            particleMaterial.opacity -= 0.005;
-        }
+        particles.scale.set(1, 1, 1);
+        particleMaterial.color.setHex(0x3b82f6); // Base Blue
+    } 
+    else if (window.jarvisState === 'LISTENING') {
+        particles.rotation.y += 0.005; // Spin slightly faster
+        const pulse = 1 + Math.sin(time * 8) * 0.03; // Gentle vibration
+        particles.scale.set(pulse, pulse, pulse);
+        particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
+        particleMaterial.opacity = 0.8; // Brighten up
+    } 
+    else if (window.jarvisState === 'THINKING') {
+        particles.rotation.x += 0.05; // Spin rapidly
+        particles.rotation.y += 0.05;
+        particles.scale.set(0.85, 0.85, 0.85); // Contract core
+        particleMaterial.color.setHex(0x9d4edd); // Processing Purple
+    } 
+    else if (window.jarvisState === 'SPEAKING') {
+        particles.rotation.y += 0.005;
+        const talkPulse = 1 + Math.sin(time * 15) * 0.08; // High frequency audio waves
+        particles.scale.set(talkPulse, talkPulse, talkPulse);
+        particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
+    }
+
+    // Return to faint background if idle and portfolio is open
+    if (isUnlocked && window.jarvisState === 'IDLE') {
+        particleMaterial.opacity = 0.3;
     }
 
     renderer.render(scene, camera);
@@ -124,95 +118,27 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Boot up the engine when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('webgl-container');
-    
-    // Only initialize 3D if we are on index.html
-    if (container) {
+    if (document.getElementById('webgl-container')) {
         init3D();
-        
-        // Check browser memory. If already unlocked, skip the bubble animation instantly.
         if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
-            isPopped = true;
-            
-            // Instantly reveal content
-            document.getElementById('portfolio-content').classList.add('active');
-            document.body.style.overflow = 'auto';
-            container.style.cursor = 'default';
-            container.style.pointerEvents = 'none';
-            
-            // Turn off the particles immediately
-            if (particleMaterial) {
-                particleMaterial.opacity = 0;
-            }
+            unlockPortfolio();
         }
     }
 });
-/* ==========================================================================
-3. SCROLL-TO-TOP CONTROLLER
-   ========================================================================== */
-const contentContainer = document.getElementById('portfolio-content');
-const scrollBtn = document.getElementById('scrollToTopBtn');
-
-// Listen for scrolling inside the active content div
-contentContainer.addEventListener('scroll', () => {
-    // Show button if scrolled down past 200 pixels
-    if (contentContainer.scrollTop > 200) {
-        scrollBtn.style.display = "block";
-    } else {
-        scrollBtn.style.display = "none";
-    }
-});
-
-// Smooth scroll back to the top
-function scrollToTop() {
-    contentContainer.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
 
 /* ==========================================================================
-4. JARVIS STATE MACHINE (Web Speech API)
+3. AI PIPELINE & NLP (Web Speech API -> Gemini)
    ========================================================================== */
-// Grab the WebGL globe container and the mic button
-const jarvisOrb = document.getElementById('webgl-container');
 const micBtn = document.getElementById('ai-mic-btn'); 
 
-// Helper function to manage visual state transitions cleanly
-function setJarvisState(state) {
-    if (!jarvisOrb) return;
-    
-    // Remove all operational state classes
-    jarvisOrb.classList.remove('idle', 'listening', 'thinking', 'speaking');
-    
-    // Add the active operational class
-    switch(state) {
-        case 'IDLE':
-            jarvisOrb.classList.add('idle');
-            break;
-        case 'LISTENING':
-            jarvisOrb.classList.add('listening');
-            break;
-        case 'THINKING':
-            jarvisOrb.classList.add('thinking');
-            break;
-        case 'SPEAKING':
-            jarvisOrb.classList.add('speaking');
-            break;
-    }
-}
-
-// Full-Duplex Voice Pipeline
 async function handleUserQuery(query) {
     if (!query.trim()) {
-        setJarvisState('IDLE');
+        window.jarvisState = 'IDLE';
         return;
     }
     
-    // Transition immediately to processing state
-    setJarvisState('THINKING');
+    window.jarvisState = 'THINKING'; // Triggers Three.js rapid spin
     
     try {
         const response = await fetch('/api/chat', {
@@ -224,63 +150,48 @@ async function handleUserQuery(query) {
         const data = await response.json();
 
         if (response.ok && data.reply) {
-            // Trigger voice synthesis and transition to speaking state
             speakText(data.reply);
         } else {
-            console.error("Backend Error:", data.error);
             speakText("System anomaly detected.");
         }
     } catch (error) {
-        console.error("Network Error:", error);
         speakText("Connection to host severed.");
     }
 }
 
-// Text-to-Speech execution with event listeners to hook the visual state
 function speakText(text) {
-    // Cancel any ongoing speech instantly
     window.speechSynthesis.cancel();
-    
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Find an appropriate clean voice
     const voices = window.speechSynthesis.getVoices();
     const selectedVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha')) || voices[0];
     if (selectedVoice) utterance.voice = selectedVoice;
     
-    utterance.rate = 1.05; // Slightly accelerated pace
-    utterance.pitch = 0.95; // Slightly lower pitch
+    utterance.rate = 1.05; 
+    utterance.pitch = 0.95; 
 
-    // State Hooks to animate the globe
-    utterance.onstart = () => setJarvisState('SPEAKING');
-    utterance.onend = () => setJarvisState('IDLE');
-    utterance.onerror = () => setJarvisState('IDLE');
+    // Hook state to Three.js
+    utterance.onstart = () => window.jarvisState = 'SPEAKING';
+    utterance.onend = () => window.jarvisState = 'IDLE';
+    utterance.onerror = () => window.jarvisState = 'IDLE';
 
     window.speechSynthesis.speak(utterance);
 }
 
-// Hook Web Speech API Recognition listeners
+// Hook Microphone
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     
-    recognition.onstart = () => setJarvisState('LISTENING');
-    recognition.onerror = () => setJarvisState('IDLE');
+    recognition.onstart = () => window.jarvisState = 'LISTENING';
+    recognition.onerror = () => window.jarvisState = 'IDLE';
     recognition.onend = () => {
-        if (!jarvisOrb.classList.contains('thinking') && !jarvisOrb.classList.contains('speaking')) {
-            setJarvisState('IDLE');
+        if (window.jarvisState !== 'THINKING' && window.jarvisState !== 'SPEAKING') {
+            window.jarvisState = 'IDLE';
         }
     };
-    recognition.onresult = (event) => {
-        handleUserQuery(event.results[0][0].transcript);
-    };
+    recognition.onresult = (event) => handleUserQuery(event.results[0][0].transcript);
 
-    // Attach to your microphone button
-    if (micBtn) {
-        micBtn.addEventListener('click', () => recognition.start());
-    }
+    if (micBtn) micBtn.addEventListener('click', () => recognition.start());
 }
-
-// Initialize default ambient state when the page loads
-setJarvisState('IDLE');
