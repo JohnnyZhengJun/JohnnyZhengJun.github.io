@@ -174,88 +174,113 @@ function scrollToTop() {
 }
 
 /* ==========================================================================
-   AI ASSISTANT ENGINE (Web Speech API)
+4. JARVIS STATE MACHINE (Web Speech API)
    ========================================================================== */
-const aiWidget = document.getElementById('ai-widget');
-const chatLog = document.getElementById('ai-chat-log');
-const textInput = document.getElementById('ai-text-input');
-const micBtn = document.getElementById('ai-mic-btn');
-const sendBtn = document.getElementById('ai-send-btn');
+// Grab the WebGL globe container and the mic button
+const jarvisOrb = document.getElementById('webgl-container');
+const micBtn = document.getElementById('ai-mic-btn'); 
 
-// Initialize Web Speech APIs
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const synthesis = window.speechSynthesis;
-let recognition = null;
-
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => micBtn.classList.add('recording');
-    recognition.onend = () => micBtn.classList.remove('recording');
+// Helper function to manage visual state transitions cleanly
+function setJarvisState(state) {
+    if (!jarvisOrb) return;
     
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        handleUserQuery(transcript);
-    };
-} else {
-    micBtn.style.display = 'none'; // Hide mic if browser doesn't support it
-}
-
-// Event Listeners
-micBtn.addEventListener('click', () => recognition && recognition.start());
-sendBtn.addEventListener('click', () => {
-    if (textInput.value.trim() !== '') {
-        handleUserQuery(textInput.value);
-        textInput.value = '';
+    // Remove all operational state classes
+    jarvisOrb.classList.remove('idle', 'listening', 'thinking', 'speaking');
+    
+    // Add the active operational class
+    switch(state) {
+        case 'IDLE':
+            jarvisOrb.classList.add('idle');
+            break;
+        case 'LISTENING':
+            jarvisOrb.classList.add('listening');
+            break;
+        case 'THINKING':
+            jarvisOrb.classList.add('thinking');
+            break;
+        case 'SPEAKING':
+            jarvisOrb.classList.add('speaking');
+            break;
     }
-});
-textInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendBtn.click();
-});
-
-// Core Logic Functions
-function appendMessage(sender, text, isUser) {
-    const msgDiv = document.createElement('p');
-    msgDiv.className = isUser ? 'user-msg' : 'ai-msg';
-    msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    chatLog.appendChild(msgDiv);
-    chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-function speakText(text) {
-    if (synthesis.speaking) synthesis.cancel(); // Interrupt previous speech
-    const utterance = new SpeechSynthesisUtterance(text);
-    // Optional: tweak pitch and rate for a more "AI" sound
-    utterance.pitch = 1.1;
-    utterance.rate = 1.0; 
-    synthesis.speak(utterance);
-}
-
+// Full-Duplex Voice Pipeline
 async function handleUserQuery(query) {
-    appendMessage('You', query, true);
+    if (!query.trim()) {
+        setJarvisState('IDLE');
+        return;
+    }
     
-    // Phase 1: Mock Response. 
-    // Phase 2: This will be replaced with a fetch() call to your secure backend.
-    const aiResponse = await mockAIResponse(query);
+    // Transition immediately to processing state
+    setJarvisState('THINKING');
     
-    appendMessage('System', aiResponse, false);
-    speakText(aiResponse);
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: query })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.reply) {
+            // Trigger voice synthesis and transition to speaking state
+            speakText(data.reply);
+        } else {
+            console.error("Backend Error:", data.error);
+            speakText("System anomaly detected.");
+        }
+    } catch (error) {
+        console.error("Network Error:", error);
+        speakText("Connection to host severed.");
+    }
 }
 
-// Temporary Mock Engine
-function mockAIResponse(query) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const lowerQuery = query.toLowerCase();
-            if (lowerQuery.includes('skills') || lowerQuery.includes('c++')) {
-                resolve("Johnny specializes in low-level systems programming, primarily using strictly-typed C++ and C.");
-            } else if (lowerQuery.includes('timeline') || lowerQuery.includes('education')) {
-                resolve("Johnny is currently in his Senior year of Computer Science Engineering at YZU.");
-            } else {
-                resolve("I am processing your request. My secure LLM connection is currently pending deployment.");
-            }
-        }, 800); // Simulate network latency
-    });
+// Text-to-Speech execution with event listeners to hook the visual state
+function speakText(text) {
+    // Cancel any ongoing speech instantly
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Find an appropriate clean voice
+    const voices = window.speechSynthesis.getVoices();
+    const selectedVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha')) || voices[0];
+    if (selectedVoice) utterance.voice = selectedVoice;
+    
+    utterance.rate = 1.05; // Slightly accelerated pace
+    utterance.pitch = 0.95; // Slightly lower pitch
+
+    // State Hooks to animate the globe
+    utterance.onstart = () => setJarvisState('SPEAKING');
+    utterance.onend = () => setJarvisState('IDLE');
+    utterance.onerror = () => setJarvisState('IDLE');
+
+    window.speechSynthesis.speak(utterance);
 }
+
+// Hook Web Speech API Recognition listeners
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    
+    recognition.onstart = () => setJarvisState('LISTENING');
+    recognition.onerror = () => setJarvisState('IDLE');
+    recognition.onend = () => {
+        if (!jarvisOrb.classList.contains('thinking') && !jarvisOrb.classList.contains('speaking')) {
+            setJarvisState('IDLE');
+        }
+    };
+    recognition.onresult = (event) => {
+        handleUserQuery(event.results[0][0].transcript);
+    };
+
+    // Attach to your microphone button
+    if (micBtn) {
+        micBtn.addEventListener('click', () => recognition.start());
+    }
+}
+
+// Initialize default ambient state when the page loads
+setJarvisState('IDLE');

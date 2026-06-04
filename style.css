@@ -481,3 +481,48 @@ input:not(:checked) + .slider .sun { color: var(--bg-color); }
     border-color: red;
     color: red;
 }
+
+/* ==========================================================================
+   JARVIS ORB STATE ANIMATIONS
+   ========================================================================== */
+#webgl-container {
+    transition: transform 0.5s ease, filter 0.5s ease;
+    border-radius: 50%; /* Helps contain the drop-shadow cleanly */
+}
+
+/* 1. IDLE: Slow, steady breathing */
+#webgl-container.idle {
+    animation: breathe 4s ease-in-out infinite;
+}
+
+/* 2. LISTENING: High-energy pulsing */
+#webgl-container.listening {
+    animation: pulse-listen 0.8s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.8));
+}
+
+/* 3. THINKING: Tight contraction and color shift */
+#webgl-container.thinking {
+    transform: scale(0.9);
+    filter: hue-rotate(45deg) drop-shadow(0 0 10px rgba(150, 0, 255, 0.5));
+}
+
+/* 4. SPEAKING: Rapid, expanding audio waves */
+#webgl-container.speaking {
+    animation: pulse-speak 0.3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 40px rgba(0, 242, 254, 1));
+}
+
+/* Keyframe Math */
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+@keyframes pulse-listen {
+    0% { transform: scale(1.02); }
+    100% { transform: scale(0.98); }
+}
+@keyframes pulse-speak {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
