@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export default async function handler(req, res) {
+export default async function handler(req, res) 
+{
     // 1. CORS & Method Protection
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -23,13 +24,14 @@ CRUCIAL: You must analyze the user's natural language intent. Classify their int
 4. "NONE" - for regular conversational questions.
 
 You must ALWAYS respond with a strict JSON object structure exactly like this:
-{"reply": "Your spoken text response here.", "action": "ACTION_TOKEN"}`
+{"reply": "Your spoken text response here."}`
         });
 
         const prompt = req.body.query;
 
         // 4. Execute the NLP Generation
-        const result = await model.generateContent({
+        const result = await model.generateContent
+        ({
             contents: [{ role: "user", parts: [{ text: prompt }]}],
             generationConfig: {
                 // Strict MIME type prevents markdown wrappers that cause parsing crashes
@@ -48,9 +50,11 @@ You must ALWAYS respond with a strict JSON object structure exactly like this:
         });
 
     } 
-    catch (error) {
+    catch (error) 
+    {
         console.error("Backend LLM Crash:", error);
-        return res.status(200).json({ 
+        return res.status(200).json
+        ({ 
             reply: "I encountered a firewall restriction while processing that. Please check the server logs.", 
             action: "NONE" 
         });

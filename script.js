@@ -1,6 +1,6 @@
 /* ==========================================================================
 1. GLOBAL JARVIS/FRIDAY STATE & THEME
-   ========================================================================== */
+========================================================================== */
 window.jarvisState = 'IDLE'; 
 let jarvisActive = false;
 let recognition; 
@@ -13,7 +13,7 @@ function toggleTheme() {
 
 /* ==========================================================================
 2. THREE.JS PHYSICS ENGINE (The 3D Sphere)
-   ========================================================================== */
+========================================================================== */
 let scene, camera, renderer, particles, particleMaterial;
 
 function init3D() {
@@ -130,7 +130,7 @@ function onWindowResize() {
 
 /* ==========================================================================
 3. BOOT SEQUENCE & CONTINUOUS AI PIPELINE
-   ========================================================================== */
+========================================================================== */
 window.speechSynthesis.onvoiceschanged = () => {
     window.speechSynthesis.getVoices();
 };
@@ -193,7 +193,7 @@ function setupAudioEngine() {
 
 /* ==========================================================================
 4. NLP INTENT ROUTING (Connected to Gemini backend)
-   ========================================================================== */
+========================================================================== */
 async function handleUserQuery(query) {
     if (!query.trim()) return;
     
@@ -231,7 +231,7 @@ async function handleUserQuery(query) {
 
 /* ==========================================================================
 5. FEMALE VOICE SYNTHESIS ENGINE (F.R.I.D.A.Y.)
-   ========================================================================== */
+========================================================================== */
 function speakText(text, callback = null) {
     window.speechSynthesis.cancel(); // Kills overlapping ghost voices
     const utterance = new SpeechSynthesisUtterance(text);
