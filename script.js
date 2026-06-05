@@ -1,7 +1,9 @@
 /* ==========================================================================
-1. GLOBAL JARVIS STATE & THEME
+1. GLOBAL JARVIS/FRIDAY STATE & THEME
    ========================================================================== */
-window.jarvisState = 'IDLE'; // IDLE, LISTENING, THINKING, SPEAKING
+window.jarvisState = 'IDLE'; 
+let jarvisActive = false;
+let recognition; 
 
 function toggleTheme() {
     const htmlTag = document.documentElement;
@@ -10,10 +12,9 @@ function toggleTheme() {
 }
 
 /* ==========================================================================
-2. THREE.JS PHYSICS ENGINE (The Avatar)
+2. THREE.JS PHYSICS ENGINE (The 3D Sphere)
    ========================================================================== */
 let scene, camera, renderer, particles, particleMaterial;
-let isUnlocked = false;
 
 function init3D() {
     const container = document.getElementById('webgl-container');
@@ -27,7 +28,6 @@ function init3D() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Create the JARVIS Sphere
     const particleCount = 5000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
@@ -36,7 +36,6 @@ function init3D() {
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos((Math.random() * 2) - 1);
         const radius = 15;
-
         positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);     
         positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta); 
         positions[i * 3 + 2] = radius * Math.cos(phi);                   
@@ -45,84 +44,80 @@ function init3D() {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     
     particleMaterial = new THREE.PointsMaterial({
-        color: 0x3b82f6, // Default Blue
-        size: 0.3,
-        transparent: true,
-        opacity: 0.8
+        color: 0x3b82f6, size: 0.3, transparent: true, opacity: 0.8
     });
 
     particles = new THREE.Points(geometry, particleMaterial);
     scene.add(particles);
 
     window.addEventListener('resize', onWindowResize);
-    container.addEventListener('click', unlockPortfolio);
-    
     animate();
 }
 
 function unlockPortfolio() {
-    if (isUnlocked) return;
-    isUnlocked = true;
-    sessionStorage.setItem('portfolioUnlocked', 'true');
-
-    // Reveal HTML over the globe
     const portfolioContent = document.getElementById('portfolio-content');
-    if (portfolioContent) {
-        portfolioContent.classList.add('active');
-    }
+    if (portfolioContent) portfolioContent.classList.add('active');
     document.body.style.overflow = 'auto';
     
-    // Smoothly push globe to background opacity
-    if (particleMaterial) {
-        particleMaterial.opacity = 0.2;
-    }
+    if (particleMaterial) particleMaterial.opacity = 0.2;
     
-    // Allow clicking elements through the canvas
     const webglContainer = document.getElementById('webgl-container');
-    if (webglContainer) {
-        webglContainer.style.pointerEvents = 'none'; 
+    if (webglContainer) webglContainer.style.pointerEvents = 'none'; 
+}
+
+function lockPortfolio() {
+    const portfolioContent = document.getElementById('portfolio-content');
+    if (portfolioContent) portfolioContent.classList.remove('active');
+    document.body.style.overflow = 'hidden';
+    
+    const bootScreen = document.getElementById('boot-screen');
+    if (bootScreen) bootScreen.style.display = 'flex';
+    
+    if (particleMaterial) particleMaterial.opacity = 0.8;
+    
+    const webglContainer = document.getElementById('webgl-container');
+    if (webglContainer) webglContainer.style.pointerEvents = 'auto'; 
+    
+    // Stop listening when locked to save API quota
+    jarvisActive = false; 
+    window.jarvisState = 'IDLE';
+    window.speechSynthesis.cancel();
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
     }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     const time = Date.now() * 0.001; 
-
     if (!particles || !particleMaterial) return;
 
-    // JARVIS VISUAL STATE MACHINE
     if (window.jarvisState === 'IDLE') {
         particles.rotation.x += 0.002;
         particles.rotation.y += 0.002;
         particles.scale.set(1, 1, 1);
-        particleMaterial.color.setHex(0x3b82f6); // Base Blue
+        particleMaterial.color.setHex(0x3b82f6); 
     } 
     else if (window.jarvisState === 'LISTENING') {
         particles.rotation.y += 0.005; 
         const pulse = 1 + Math.sin(time * 8) * 0.04; 
         particles.scale.set(pulse, pulse, pulse);
-        particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
+        particleMaterial.color.setHex(0x00f2fe); 
         particleMaterial.opacity = 0.85; 
     } 
     else if (window.jarvisState === 'THINKING') {
         particles.rotation.x += 0.06; 
         particles.rotation.y += 0.06;
         particles.scale.set(0.8, 0.8, 0.8); 
-        particleMaterial.color.setHex(0x9d4edd); // Processing Purple
+        particleMaterial.color.setHex(0x9d4edd); 
     } 
     else if (window.jarvisState === 'SPEAKING') {
         particles.rotation.y += 0.004;
         const talkPulse = 1 + Math.sin(time * 16) * 0.07; 
         particles.scale.set(talkPulse, talkPulse, talkPulse);
-        particleMaterial.color.setHex(0x00f2fe); // Bright Cyan
+        particleMaterial.color.setHex(0x00f2fe); 
         particleMaterial.opacity = 0.85;
     }
-
-    // Retain faint visual presence if system is unlocked and idle
-    if (isUnlocked && window.jarvisState === 'IDLE') {
-        particleMaterial.opacity = 0.2;
-    }
-
     renderer.render(scene, camera);
 }
 
@@ -133,41 +128,74 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+/* ==========================================================================
+3. BOOT SEQUENCE & CONTINUOUS AI PIPELINE
+   ========================================================================== */
+window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('webgl-container')) {
-        init3D();
-        if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
-            unlockPortfolio();
+    init3D();
+    setupAudioEngine();
+
+    document.getElementById('btn-standard').addEventListener('click', () => {
+        document.getElementById('boot-screen').style.display = 'none';
+        unlockPortfolio();
+    });
+
+    document.getElementById('btn-jarvis').addEventListener('click', () => {
+        document.getElementById('boot-screen').style.display = 'none';
+        jarvisActive = true;
+        
+        if (recognition) {
+            try { recognition.start(); } catch (e) { console.log("Mic primed."); }
         }
-    }
+        
+        speakText("System initialized. Welcome back, Johnny. Listening for commands.");
+    });
 });
 
-/* ==========================================================================
-3. AI PIPELINE & VOCAL ROUTING COMMANDS
-   ========================================================================== */
-const micBtn = document.getElementById('ai-mic-btn'); 
+function setupAudioEngine() {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
 
-async function handleUserQuery(query) {
-    const cleanQuery = query.toLowerCase().trim();
-    if (!cleanQuery) {
-        window.jarvisState = 'IDLE';
-        return;
-    }
+    recognition = new SpeechRecognitionAPI();
+    recognition.continuous = false; 
     
-    // Local NLP Command Parser for Direct Navigation Route
-    if (cleanQuery.includes('open portfolio') || 
-        cleanQuery.includes('access system') || 
-        cleanQuery.includes('enter') || 
-        cleanQuery.includes('show portfolio')) {
-        
-        window.jarvisState = 'THINKING';
-        setTimeout(() => {
-            speakText("Access granted. Initializing portfolio display protocol.", () => {
-                unlockPortfolio();
-            });
-        }, 400);
-        return;
-    }
+    recognition.onstart = () => {
+        if (window.speechSynthesis.speaking) {
+            window.jarvisState = 'SPEAKING';
+        } else {
+            window.jarvisState = 'LISTENING';
+        }
+    };
+    
+    recognition.onend = () => {
+        if (jarvisActive && window.jarvisState !== 'THINKING' && window.jarvisState !== 'SPEAKING') {
+            window.jarvisState = 'IDLE';
+            try { recognition.start(); } catch(e) {} 
+        }
+    };
+    
+    recognition.onerror = (e) => {
+        if (window.jarvisState !== 'THINKING' && window.jarvisState !== 'SPEAKING') {
+            window.jarvisState = 'IDLE';
+        }
+    };
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log("Captured speech:", transcript);
+        handleUserQuery(transcript);
+    };
+}
+
+/* ==========================================================================
+4. NLP INTENT ROUTING (Connected to Gemini backend)
+   ========================================================================== */
+async function handleUserQuery(query) {
+    if (!query.trim()) return;
     
     window.jarvisState = 'THINKING'; 
     
@@ -181,58 +209,61 @@ async function handleUserQuery(query) {
         const data = await response.json();
 
         if (response.ok && data.reply) {
-            speakText(data.reply);
+            speakText(data.reply, () => {
+                const targetAction = data.action ? data.action.toUpperCase().trim() : 'NONE';
+                console.log("NLP Action Triggered:", targetAction);
+                
+                if (targetAction === 'UNLOCK_PORTFOLIO') {
+                    unlockPortfolio();
+                } else if (targetAction === 'LOCK_PORTFOLIO') {
+                    lockPortfolio();
+                } else if (targetAction === 'OPEN_TECHNICAL_SKILLS') {
+                    window.open('https://github.com/JohnnyZhengJun/C-double-plus.git', '_blank');
+                }
+            });
         } else {
-            speakText("System anomaly detected during handshake.");
+            speakText("System anomaly detected during processing.");
         }
     } catch (error) {
         speakText("Network configuration conflict. Connection severed.");
     }
 }
 
+/* ==========================================================================
+5. FEMALE VOICE SYNTHESIS ENGINE (F.R.I.D.A.Y.)
+   ========================================================================== */
 function speakText(text, callback = null) {
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // Kills overlapping ghost voices
     const utterance = new SpeechSynthesisUtterance(text);
     
     const voices = window.speechSynthesis.getVoices();
-    const selectedVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha')) || voices[0];
+    
+    // Aggressively hunt for premium Female voices
+    const selectedVoice = voices.find(v => 
+        v.name.includes('Samantha') ||                 
+        v.name.includes('Google UK English Female') || 
+        v.name.includes('Victoria') ||                 
+        v.name.includes('Karen') ||
+        v.name.includes('Tessa')
+    ) || voices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman')) || voices[0];
+    
     if (selectedVoice) utterance.voice = selectedVoice;
     
-    utterance.rate = 1.05; 
-    utterance.pitch = 0.95; 
+    utterance.rate = 1.05;  
+    utterance.pitch = 1.15; // Higher pitch for a distinct feminine AI tone
 
-    utterance.onstart = () => window.jarvisState = 'SPEAKING';
+    utterance.onstart = () => {
+        window.jarvisState = 'SPEAKING';
+    };
+    
     utterance.onend = () => {
         window.jarvisState = 'IDLE';
         if (callback) callback();
-    };
-    utterance.onerror = () => {
-        window.jarvisState = 'IDLE';
-        if (callback) callback();
+        
+        if (jarvisActive && recognition) {
+            try { recognition.start(); } catch(e) {}
+        }
     };
 
     window.speechSynthesis.speak(utterance);
-}
-
-// Speech Recognition Lifecycle Handling
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    
-    recognition.onstart = () => window.jarvisState = 'LISTENING';
-    recognition.onerror = () => window.jarvisState = 'IDLE';
-    recognition.onend = () => {
-        if (window.jarvisState !== 'THINKING' && window.jarvisState !== 'SPEAKING') {
-            window.jarvisState = 'IDLE';
-        }
-    };
-    recognition.onresult = (event) => handleUserQuery(event.results[0][0].transcript);
-
-    if (micBtn) {
-        micBtn.addEventListener('click', () => {
-            window.speechSynthesis.cancel(); // Mute ongoing talking immediately on new tap
-            recognition.start();
-        });
-    }
 }

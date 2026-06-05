@@ -1,54 +1,51 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
 export default async function handler(req, res) {
-    // Only allow POST requests
+    // CORS & Method checking
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        return res.status(405).json({ error: 'Method not allowed' });
     }
-
-    const { query } = req.body;
-
-    if (!query) {
-        return res.status(400).json({ error: 'No query provided' });
-    }
-
-    // Securely pull the API key from Vercel's environment variables
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-        return res.status(500).json({ error: 'API key not configured on server.' });
-    }
-
-    // The System Prompt: This tells the AI who it is and how to behave.
-    const systemInstruction = `You are a highly efficient, JARVIS-like AI assistant embedded in the personal portfolio of Johnny, a Senior Computer Science Engineering student. 
-    Johnny specializes in low-level systems programming (C++, C, memory alignment) and algorithm optimization.
-    Keep your answers extremely concise, professional, and slightly futuristic. Do not use markdown or emojis, as your text will be read aloud by a text-to-speech engine.`;
 
     try {
-        // Ping the Gemini API
-        const apiKey = process.env.GEMINI_API_KEY;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                system_instruction: {
-                    parts: [{ text: systemInstruction }]
-                },
-                contents: [{
-                    role: "user",
-                    parts: [{ text: query }]
-                }]
-            })
+        const query = req.body.query.toLowerCase().trim();
+        let targetAction = "NONE";
+        let spokenReply = "I am processing your request, Johnny.";
+
+        // --- LOCAL NLP OVERRIDE ENGINE ---
+        
+        // 1. Unlock Portfolio
+        if (query.includes('open') || query.includes('access') || query.includes('show portfolio')) {
+            targetAction = "UNLOCK_PORTFOLIO";
+            spokenReply = "Access granted. Initializing portfolio display protocol.";
+        } 
+        // 2. Open Technical Skills
+        else if (query.includes('skill') || query.includes('language') || query.includes('code') || query.includes('tech')) {
+            targetAction = "OPEN_TECHNICAL_SKILLS";
+            spokenReply = "Accessing Technical Skills repository now.";
+        } 
+        // 3. Lock System
+        else if (query.includes('back') || query.includes('lock') || query.includes('close') || query.includes('main page')) {
+            targetAction = "LOCK_PORTFOLIO";
+            spokenReply = "Securing database modules. Returning to system initialization screen.";
+        } 
+        // 4. Conversational Fallback
+        else {
+            spokenReply = "My advanced conversational nodes are currently resting to conserve server quota, but my local navigation protocols are fully operational.";
+        }
+
+        // Simulate a slight AI thinking delay so your 3D sphere turns purple for a moment
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Return the perfect JSON format our frontend expects
+        return res.status(200).json({ 
+            reply: spokenReply, 
+            action: targetAction 
         });
 
-        const data = await response.json();
-
-        // Extract the actual text reply from the Gemini JSON structure
-        const aiText = data.candidates[0].content.parts[0].text;
-
-        // Send it back to the frontend
-        return res.status(200).json({ reply: aiText });
-
     } catch (error) {
-        console.error("LLM Error:", error);
-        return res.status(500).json({ error: 'Neural net connection failed.' });
+        console.error("Local Routing Error:", error);
+        return res.status(200).json({ 
+            reply: "Local server routing error.", 
+            action: "NONE" 
+        });
     }
 }
