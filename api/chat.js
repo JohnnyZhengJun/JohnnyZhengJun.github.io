@@ -1,50 +1,57 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export default async function handler(req, res) {
-    // CORS & Method checking
+    // 1. CORS & Method Protection
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        const query = req.body.query.toLowerCase().trim();
-        let targetAction = "NONE";
-        let spokenReply = "I am processing your request, Johnny.";
-
-        // --- LOCAL NLP OVERRIDE ENGINE ---
+        // 2. Initialize the Google AI SDK with your new API Key
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         
-        // 1. Unlock Portfolio
-        if (query.includes('open') || query.includes('access') || query.includes('show portfolio')) {
-            targetAction = "UNLOCK_PORTFOLIO";
-            spokenReply = "Access granted. Initializing portfolio display protocol.";
-        } 
-        // 2. Open Technical Skills
-        else if (query.includes('skill') || query.includes('language') || query.includes('code') || query.includes('tech')) {
-            targetAction = "OPEN_TECHNICAL_SKILLS";
-            spokenReply = "Accessing Technical Skills repository now.";
-        } 
-        // 3. Lock System
-        else if (query.includes('back') || query.includes('lock') || query.includes('close') || query.includes('main page')) {
-            targetAction = "LOCK_PORTFOLIO";
-            spokenReply = "Securing database modules. Returning to system initialization screen.";
-        } 
-        // 4. Conversational Fallback
-        else {
-            spokenReply = "My advanced conversational nodes are currently resting to conserve server quota, but my local navigation protocols are fully operational.";
-        }
+        // 3. Connect to the active 2.0 model architecture
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-2.0-flash", 
+            systemInstruction: `You are F.R.I.D.A.Y., Johnny's elite AI portfolio assistant. 
+Your job is to assist visitors and speak with a professional, sharp AI demeanor.
 
-        // Simulate a slight AI thinking delay so your 3D sphere turns purple for a moment
-        await new Promise(resolve => setTimeout(resolve, 800));
+CRUCIAL: You must analyze the user's natural language intent. Classify their intent into one of these exact action tokens:
+1. "UNLOCK_PORTFOLIO" - if they want to enter, open, see, or look at the main site/portfolio.
+2. "LOCK_PORTFOLIO" - if they want to go back, close, exit, or return to the main splash/boot screen.
+3. "OPEN_TECHNICAL_SKILLS" - if they express interest in Johnny's skills, programming languages, tech stack, or what he codes in.
+4. "NONE" - for regular conversational questions.
 
-        // Return the perfect JSON format our frontend expects
-        return res.status(200).json({ 
-            reply: spokenReply, 
-            action: targetAction 
+You must ALWAYS respond with a strict JSON object structure exactly like this:
+{"reply": "Your spoken text response here.", "action": "ACTION_TOKEN"}`
         });
 
-    } catch (error) {
-        console.error("Local Routing Error:", error);
+        const prompt = req.body.query;
+
+        // 4. Execute the NLP Generation
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }]}],
+            generationConfig: {
+                // Strict MIME type prevents markdown wrappers that cause parsing crashes
+                responseMimeType: "application/json", 
+            }
+        });
+
+        // 5. Parse and Return
+        const response = await result.response;
+        const text = response.text();
+        const parsedData = JSON.parse(text);
+
         return res.status(200).json({ 
-            reply: "Local server routing error.", 
+            reply: parsedData.reply || "Processing complete.", 
+            action: parsedData.action || "NONE" 
+        });
+
+    } 
+    catch (error) {
+        console.error("Backend LLM Crash:", error);
+        return res.status(200).json({ 
+            reply: "I encountered a firewall restriction while processing that. Please check the server logs.", 
             action: "NONE" 
         });
     }
