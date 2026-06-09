@@ -219,6 +219,17 @@ async function handleUserQuery(query) {
                     lockPortfolio();
                 } else if (targetAction === 'OPEN_TECHNICAL_SKILLS') {
                     window.open('https://github.com/JohnnyZhengJun/C-double-plus.git', '_blank');
+                } else if (targetAction === 'OPEN_TIMELINE') {
+                    // Redirects the browser to your timeline HTML file
+                    window.location.href = 'timeline.html';
+                } else if (targetAction === 'OPEN_PROJECT_0') {
+                    // Smooth scrolls the viewport directly to the Two Sum project
+                    const p0 = document.getElementById('project-0');
+                    if (p0) p0.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (targetAction === 'OPEN_PROJECT_B') {
+                    // Smooth scrolls the viewport directly to the Database project
+                    const pB = document.getElementById('project-b');
+                    if (pB) pB.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
         } else {
