@@ -223,6 +223,9 @@ async function handleUserQuery(query) {
                     if (skillsSection) {
                         skillsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
+                } else if (targetAction === 'OPEN_CPP_REPO') {
+                    //  Navigates to your GitHub directly.
+                    window.location.href = 'https://github.com/JohnnyZhengJun/C-double-plus.git';
                 } else if (targetAction === 'OPEN_TIMELINE') {
                     // Redirects the browser to your timeline HTML file
                     window.location.href = 'timeline.html';
