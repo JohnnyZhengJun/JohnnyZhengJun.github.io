@@ -14,7 +14,7 @@ export async function callGeminiActivity(query) {
     
     // Using gemini 3.5 flash
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-3.5-flash",
+        model: "gemini-3.1-pro-preview",
         systemInstruction: `You are F.R.I.D.A.Y., Johnny's elite personal portfolio assistant. 
 
 CONTEXT: Johnny is a Computer Science student. His technical arsenal includes:
