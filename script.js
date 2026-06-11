@@ -16,7 +16,8 @@ function toggleTheme() {
 ========================================================================== */
 let scene, camera, renderer, particles, particleMaterial;
 
-function init3D() {
+function init3D() 
+{
     const container = document.getElementById('webgl-container');
     if (!container) return;
     
@@ -54,7 +55,8 @@ function init3D() {
     animate();
 }
 
-function unlockPortfolio() {
+function unlockPortfolio() 
+{
     const portfolioContent = document.getElementById('portfolio-content');
     if (portfolioContent) portfolioContent.classList.add('active');
     document.body.style.overflow = 'auto';
@@ -65,7 +67,8 @@ function unlockPortfolio() {
     if (webglContainer) webglContainer.style.pointerEvents = 'none'; 
 }
 
-function lockPortfolio() {
+function lockPortfolio() 
+{
     const portfolioContent = document.getElementById('portfolio-content');
     if (portfolioContent) portfolioContent.classList.remove('active');
     document.body.style.overflow = 'hidden';
@@ -87,7 +90,8 @@ function lockPortfolio() {
     }
 }
 
-function animate() {
+function animate() 
+{
     requestAnimationFrame(animate);
     const time = Date.now() * 0.001; 
     if (!particles || !particleMaterial) return;
@@ -131,7 +135,8 @@ function onWindowResize() {
 /* ==========================================================================
 3. BOOT SEQUENCE & CONTINUOUS AI PIPELINE
 ========================================================================== */
-window.speechSynthesis.onvoiceschanged = () => {
+window.speechSynthesis.onvoiceschanged = () => 
+{
     window.speechSynthesis.getVoices();
 };
 
@@ -144,7 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         unlockPortfolio();
     });
 
-    document.getElementById('btn-jarvis').addEventListener('click', () => {
+    document.getElementById('btn-jarvis').addEventListener('click', () => 
+    {
         document.getElementById('boot-screen').style.display = 'none';
         jarvisActive = true;
         
